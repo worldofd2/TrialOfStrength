@@ -46,7 +46,7 @@ public:
             return true;
         }
 
-        auto iScript = (ToSInstanceScript*)creature->GetInstanceScript();
+        auto iScript = (InstanceScript*)creature->GetInstanceScript();
         if (!iScript)
         {
             CloseGossipMenuFor(player);
@@ -83,16 +83,16 @@ public:
 
         if (iScript->IsEncounterInProgress() && waveCleared && hasMoreWaves)
         {
-            if (iScript->IsRewardChestEmpty())
-            {
+            //if (iScript->IsRewardChestEmpty())
+            //{
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, Acore::StringFormatFmt("Yes, I would like to proceed to the next wave. ({})", currentWave + 1), GOSSIP_SENDER_MAIN, TOS_GOSSIP_ENCOUNTER_NEXT_WAVE);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I would like to stop here.", GOSSIP_SENDER_MAIN, TOS_GOSSIP_ENCOUNTER_RESET);
-            }
-            else
-            {
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, Acore::StringFormatFmt("Yes, I would like to proceed to the next wave. ({})", currentWave + 1), GOSSIP_SENDER_MAIN, TOS_GOSSIP_ENCOUNTER_NEXT_WAVE, "You have unlooted items in the reward chest, are you sure you want to continue?", 0, false);
-                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I would like to stop here.", GOSSIP_SENDER_MAIN, TOS_GOSSIP_ENCOUNTER_RESET, "You have unlooted items in the reward chest, are you sure you want to continue?", 0, false);
-            }
+            //}
+            //else
+            //{
+            //    AddGossipItemFor(player, GOSSIP_ICON_CHAT, Acore::StringFormatFmt("Yes, I would like to proceed to the next wave. ({})", currentWave + 1), GOSSIP_SENDER_MAIN, TOS_GOSSIP_ENCOUNTER_NEXT_WAVE, "You have unlooted items in the reward chest, are you sure you want to continue?", 0, false);
+            //    AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I would like to stop here.", GOSSIP_SENDER_MAIN, TOS_GOSSIP_ENCOUNTER_RESET, "You have unlooted items in the reward chest, are you sure you want to continue?", 0, false);
+            //}
 
             SendGossipMenuFor(player, TOS_ARENA_MASTER_TEXT_WAVE_NEXT, creature);
 
@@ -129,13 +129,15 @@ public:
         if (action == TOS_GOSSIP_TELEPORT_TO)
         {
             CloseGossipMenuFor(player);
-            player->TeleportTo(TOS_MAP_ID, 176.726, -126.015, 18.022, 4.739);
+            player->TeleportTo(TOS_MAP_ID, 629.948, -179.466, -52.732, 3.137);
+            player->SetPhaseMask(2, true);
+            //player->TeleportTo(44, 176.726, -126.015, 18.022, 4.739);
         }
 
         if (action == TOS_GOSSIP_TELEPORT_FROM)
         {
             CloseGossipMenuFor(player);
-            player->TeleportTo(TOS_MAP_ID, 176.726, -126.015, 18.022, 4.739);
+            player->TeleportTo(44, 176.726, -126.015, 18.022, 4.739);
         }
 
         if (action == TOS_GOSSIP_ENCOUNTER_START)

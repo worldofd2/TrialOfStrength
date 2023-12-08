@@ -11,9 +11,6 @@
 
 #include "scripts/ToSArenaMasterScript.h"
 
-#include "scripts/ToSInstanceScript.h"
-#include "scripts/ToSInstanceMapScript.h"
-
 #include "scripts/ToSPlayerScript.h"
 #include "scripts/ToSCurseCrystalScript.h"
 
@@ -197,8 +194,6 @@ void SC_AddTrialOfStrengthScripts()
         new ToSAISpellRadioactive();
         new ToSAIMeleeCritter();
     }
-
-    new ToSInstanceMapScript();
 
     new ToSPlayerScript();
     new ToSCurseCrystalScript();

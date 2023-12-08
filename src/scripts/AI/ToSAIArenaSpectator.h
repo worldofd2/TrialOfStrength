@@ -3,7 +3,6 @@
 
 #include "ScriptMgr.h"
 #include "ScriptedCreature.h"
-#include "ToSInstanceScript.h"
 
 class ToSAIArenaSpectator : public CreatureScript
 {
@@ -45,6 +44,7 @@ public:
 
         void DoEmote()
         {
+            /*
             auto iScript = (ToSInstanceScript*)me->GetInstanceScript();
             if (!iScript)
             {
@@ -58,6 +58,7 @@ public:
             {
                 return;
             }
+            */
 
             switch (urand(0, 2))
             {

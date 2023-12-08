@@ -1,7 +1,6 @@
 #include "ToSCurseCrystalScript.h"
 
 #include "TrialOfStrength.h"
-#include "ToSInstanceScript.h"
 
 #include <ScriptedGossip.h>
 
@@ -25,7 +24,7 @@ bool ToSCurseCrystalScript::OnGossipHello(Player* player, GameObject* go)
     {
         return false;
     }
-
+    /*
     auto iScript = (ToSInstanceScript*)instance->GetInstanceScript();
     if (!iScript)
     {
@@ -45,9 +44,11 @@ bool ToSCurseCrystalScript::OnGossipHello(Player* player, GameObject* go)
         LOG_INFO("module", "Failed to get curse information for crystal.");
         return false;
     }
+   
 
     AddGossipItemFor(player, GOSSIP_ICON_CHAT, Acore::StringFormatFmt("|cff000000{}|n|cff212121{}|r|n{}", curseInfo->name, curseInfo->description, sToSMapMgr->GetDifficultyString(curseInfo->difficulty)), GOSSIP_SENDER_MAIN, curseInfo->id);
     SendGossipMenuFor(player, 1, go->GetGUID());
+     */
 
     return true;
 }
@@ -76,15 +77,15 @@ bool ToSCurseCrystalScript::OnGossipSelect(Player* player, GameObject* go, uint3
         return false;
     }
 
-    auto iScript = (ToSInstanceScript*)instance->GetInstanceScript();
+    auto iScript = (InstanceScript*)instance->GetInstanceScript();
     if (!iScript)
     {
         return false;
     }
 
-    iScript->AddCurse(action);
-    iScript->RemoveAvailableCurse(action);
-    iScript->DespawnCurseCrystals();
+    //iScript->AddCurse(action);
+    //iScript->RemoveAvailableCurse(action);
+    //iScript->DespawnCurseCrystals();
 
     CloseGossipMenuFor(player);
 
