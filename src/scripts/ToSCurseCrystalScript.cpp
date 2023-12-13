@@ -3,6 +3,7 @@
 #include "TrialOfStrength.h"
 
 #include <ScriptedGossip.h>
+#include <OriginalDungeon/instance_blackrock_depths.cpp>
 
 bool ToSCurseCrystalScript::OnGossipHello(Player* player, GameObject* go)
 {
@@ -24,8 +25,9 @@ bool ToSCurseCrystalScript::OnGossipHello(Player* player, GameObject* go)
     {
         return false;
     }
-    /*
-    auto iScript = (ToSInstanceScript*)instance->GetInstanceScript();
+
+    //TODO: this is dirty
+    auto iScript = (instance_blackrock_depths_tos::instance_blackrock_depths_InstanceMapScript*)instance->GetInstanceScript();
     if (!iScript)
     {
         return false;
@@ -48,7 +50,7 @@ bool ToSCurseCrystalScript::OnGossipHello(Player* player, GameObject* go)
 
     AddGossipItemFor(player, GOSSIP_ICON_CHAT, Acore::StringFormatFmt("|cff000000{}|n|cff212121{}|r|n{}", curseInfo->name, curseInfo->description, sToSMapMgr->GetDifficultyString(curseInfo->difficulty)), GOSSIP_SENDER_MAIN, curseInfo->id);
     SendGossipMenuFor(player, 1, go->GetGUID());
-     */
+     
 
     return true;
 }
@@ -77,15 +79,13 @@ bool ToSCurseCrystalScript::OnGossipSelect(Player* player, GameObject* go, uint3
         return false;
     }
 
-    auto iScript = (InstanceScript*)instance->GetInstanceScript();
+    auto iScript = instance->GetInstanceScript();
     if (!iScript)
     {
         return false;
     }
 
-    //iScript->AddCurse(action);
-    //iScript->RemoveAvailableCurse(action);
-    //iScript->DespawnCurseCrystals();
+    iScript->SetData(TOS_DATA_ENCOUNTER_SELECTED_CURSE, action);
 
     CloseGossipMenuFor(player);
 

@@ -26,6 +26,7 @@ public:
     void ClearCurses(Unit* unit);
     ToSCurseTemplate* GetCurseById(uint32 curseId);
     ToSWaveTemplate* GetWaveTemplateForWave(uint32 wave);
+    ToSWaveTemplate* GetRandomWaveForEndless(uint32 wave);
     uint32 GetTotalWaves();
     std::vector<ToSEnemyGroup*> GetEnemiesFromGroup(uint32 groupId, uint32 subGroup);
     std::vector<ToSRewardTemplate>* GetRewardTemplates(uint32 rewardId);

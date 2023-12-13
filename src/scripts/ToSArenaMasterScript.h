@@ -16,9 +16,11 @@ public:
 
         TOS_GOSSIP_TELEPORT_TO = 1,
         TOS_GOSSIP_TELEPORT_FROM = 2,
-        TOS_GOSSIP_ENCOUNTER_START = 3,
+        //TOS_GOSSIP_ENCOUNTER_START = 3,
         TOS_GOSSIP_ENCOUNTER_NEXT_WAVE = 4,
         TOS_GOSSIP_ENCOUNTER_RESET = 5,
+        TOS_GOSSIP_ENCOUNTER_TRIAL_START = 6,
+        TOS_GOSSIP_ENCOUNTER_ENDLESS_START = 7,
     };
 
     virtual bool OnGossipHello(Player* player, Creature* creature) override
@@ -64,7 +66,8 @@ public:
 
         if (!iScript->IsEncounterInProgress() && !waveCleared)
         {
-            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Yes, I am ready to start the Trial of Strength.", GOSSIP_SENDER_MAIN, TOS_GOSSIP_ENCOUNTER_START);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Yes, I am ready to start the Trial of Strength.", GOSSIP_SENDER_MAIN, TOS_GOSSIP_ENCOUNTER_TRIAL_START);
+            AddGossipItemFor(player, GOSSIP_ICON_CHAT, "Yes, I am ready to start Endless waves trial.", GOSSIP_SENDER_MAIN, TOS_GOSSIP_ENCOUNTER_ENDLESS_START);
             AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I changed my mind, I would like to leave.", GOSSIP_SENDER_MAIN, TOS_GOSSIP_TELEPORT_FROM);
 
             SendGossipMenuFor(player, TOS_ARENA_MASTER_TEXT_PRE_TRIAL, creature);
@@ -83,16 +86,17 @@ public:
 
         if (iScript->IsEncounterInProgress() && waveCleared && hasMoreWaves)
         {
-            //if (iScript->IsRewardChestEmpty())
-            //{
+            auto isRewardChestEmpty = iScript->GetData(TOS_DATA_ENCOUNTER_IS_REWARD_CHEST_EMPTY) > 0;
+            if (isRewardChestEmpty)
+            {
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, Acore::StringFormatFmt("Yes, I would like to proceed to the next wave. ({})", currentWave + 1), GOSSIP_SENDER_MAIN, TOS_GOSSIP_ENCOUNTER_NEXT_WAVE);
                 AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I would like to stop here.", GOSSIP_SENDER_MAIN, TOS_GOSSIP_ENCOUNTER_RESET);
-            //}
-            //else
-            //{
-            //    AddGossipItemFor(player, GOSSIP_ICON_CHAT, Acore::StringFormatFmt("Yes, I would like to proceed to the next wave. ({})", currentWave + 1), GOSSIP_SENDER_MAIN, TOS_GOSSIP_ENCOUNTER_NEXT_WAVE, "You have unlooted items in the reward chest, are you sure you want to continue?", 0, false);
-            //    AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I would like to stop here.", GOSSIP_SENDER_MAIN, TOS_GOSSIP_ENCOUNTER_RESET, "You have unlooted items in the reward chest, are you sure you want to continue?", 0, false);
-            //}
+            }
+            else
+            {
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, Acore::StringFormatFmt("Yes, I would like to proceed to the next wave. ({})", currentWave + 1), GOSSIP_SENDER_MAIN, TOS_GOSSIP_ENCOUNTER_NEXT_WAVE, "You have unlooted items in the reward chest, are you sure you want to continue?", 0, false);
+                AddGossipItemFor(player, GOSSIP_ICON_CHAT, "I would like to stop here.", GOSSIP_SENDER_MAIN, TOS_GOSSIP_ENCOUNTER_RESET, "You have unlooted items in the reward chest, are you sure you want to continue?", 0, false);
+            }
 
             SendGossipMenuFor(player, TOS_ARENA_MASTER_TEXT_WAVE_NEXT, creature);
 
@@ -140,13 +144,23 @@ public:
             player->TeleportTo(44, 176.726, -126.015, 18.022, 4.739);
         }
 
-        if (action == TOS_GOSSIP_ENCOUNTER_START)
+        if (action == TOS_GOSSIP_ENCOUNTER_TRIAL_START)
         {
             CloseGossipMenuFor(player);
 
             if (InstanceScript* pInstance = creature->GetInstanceScript())
             {
-                pInstance->SetData(TOS_DATA_ENCOUNTER_START, 1);
+                pInstance->SetData(TOS_DATA_ENCOUNTER_TRIAL_START, 1);
+            }
+        }
+
+        if (action == TOS_GOSSIP_ENCOUNTER_ENDLESS_START)
+        {
+            CloseGossipMenuFor(player);
+
+            if (InstanceScript* pInstance = creature->GetInstanceScript())
+            {
+                pInstance->SetData(TOS_DATA_ENCOUNTER_ENDLESS_START, 1);
             }
         }
 
@@ -169,7 +183,7 @@ public:
                 if (!pInstance->GetData(TOS_DATA_ENCOUNTER_WAVE_IN_PROGRESS))
                 {
                     pInstance->SetData(TOS_DATA_ENCOUNTER_CURRENT_WAVE, pInstance->GetData(TOS_DATA_ENCOUNTER_CURRENT_WAVE) + 1);
-                    pInstance->SetData(TOS_DATA_ENCOUNTER_START, 1);
+                    pInstance->SetData(TOS_DATA_ENCOUNTER_TRIAL_START, 1);
                 }
             }
         }

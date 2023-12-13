@@ -4,6 +4,8 @@
 #include "ScriptMgr.h"
 #include "Player.h"
 
+#include "ToSMapMgr.h"
+
 class ToSCurseCrystalScript : public GameObjectScript
 {
 public:

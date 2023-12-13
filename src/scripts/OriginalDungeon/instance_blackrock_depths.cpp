@@ -26,6 +26,13 @@
 
 constexpr auto MAX_ENCOUNTER = 6;
 
+
+enum EventType
+{
+    TOS_EVENT_TRIAL = 1,
+    TOS_EVENT_ENDLESS = 2,
+};
+
 enum Timers
 {
     TIMER_TOMBOFTHESEVEN = 30000,
@@ -166,6 +173,7 @@ public:
 
         bool encounterInProgress = false;
         bool waveInProgress = false;
+        ToSWaveTemplate* waveTemplate = nullptr;
 
         uint32 currentWave = 1;
         uint32 totalWaves;
@@ -175,6 +183,8 @@ public:
         bool waveCleared = false;
         bool trialCompleted = false;
         bool cheerPlayed = false;
+
+        EventType eventType;
 
         std::vector<Creature*> waveCreatures;
         std::vector<ToSCurseTemplate*> curses;
@@ -272,6 +282,12 @@ public:
             arenaBossToSpawn = urand(0, 5);
         }
 
+        void SelectedCurse(uint32 curseId) {
+            AddCurse(curseId);
+            RemoveAvailableCurse(curseId);
+            DespawnCurseCrystals();
+        }
+
         void AddCurse(uint32 curseId)
         {
             auto it = sToSMapMgr->CurseTemplates.find(curseId);
@@ -310,13 +326,8 @@ public:
             return waveInProgress;
         }
 
-        void SpawnNextWave(ToSWaveTemplate* waveTemplate = nullptr)
+        void SpawnNextWave()
         {
-            if (!waveTemplate)
-            {
-                waveTemplate = sToSMapMgr->GetWaveTemplateForWave(currentWave);
-            }
-
             if (!waveTemplate)
             {
                 LOG_WARN("module", "Wave template is nullptr.");
@@ -755,6 +766,29 @@ public:
             return false;
         }
 
+        void ResurrectPlayers()
+        {
+            Map::PlayerList const& players = instance->GetPlayers();
+
+            for (const auto& it : players)
+            {
+                Player* player = it.GetSource();
+
+                if (!player)
+                    continue;
+
+                if (player->isDead())
+                {
+                    player->ResurrectPlayer(100, false);
+
+                    if (player->HasCorpse())
+                    {
+                        player->RemoveCorpse();
+                    }
+                }
+            }
+        }
+
         bool CheckFailure()
         {
             // Check if any alive in the arena.
@@ -763,10 +797,37 @@ public:
                 return false;
             }
 
-            NotifyFailure();
-            ResetEncounter();
+            if (eventType == TOS_EVENT_TRIAL) {
+                NotifyFailure();
+                ResetEncounter();
 
-            return true;
+                return true;
+            }
+            else
+            {
+                AnnounceCompletion();
+                PopulateRewardForEndlessChest();
+                CleanupCreatures();
+                ResurrectPlayers();
+
+                if (sConfigMgr->GetOption<bool>("TrialOfStrength.ResetCooldowns", true))
+                {
+                    ResetPlayerCooldowns();
+                }
+
+                waveInProgress = false;
+                waveCleared = false;
+                cheerPlayed = false;             
+                trialCompleted = true;
+                encounterInProgress = false;
+
+
+                //ResetEncounter();
+
+                return true;
+            }
+
+            
         }
 
         void NotifyFailure()
@@ -793,13 +854,14 @@ public:
             }
         }
 
-        void SetupEncounter()
+        void SetupTrialEncounter()
         {
+            eventType = TOS_EVENT_TRIAL;
             encounterInProgress = true;
             waveInProgress = true;
             waveCleared = false;
 
-            auto waveTemplate = sToSMapMgr->GetWaveTemplateForWave(currentWave);
+            waveTemplate = sToSMapMgr->GetWaveTemplateForWave(currentWave);
             if (!waveTemplate)
             {
                 LOG_WARN("module", "Wave template is nullptr.");
@@ -807,6 +869,42 @@ public:
             }
 
             totalWaves = sToSMapMgr->GetTotalWaves();
+
+            currentSubGroup = 1;
+            auto subGroups = sToSMapMgr->GetSubGroups(waveTemplate->enemyGroup);
+            totalSubGroups = subGroups.size();
+
+            if (totalSubGroups < 1)
+            {
+                LOG_WARN("module", "There were no subgroups found for wave {}.", currentWave);
+                return;
+            }
+
+            instance->PlayDirectSoundToMap(TOS_SOUND_HORN);
+
+            CleanupCreatures();
+            CleanupGameObjects();
+            DespawnCurseCrystals();
+
+            events.ScheduleEvent(TOS_DATA_ENCOUNTER_START_NEXT_WAVE, 3s);
+            events.ScheduleEvent(TOS_DATA_ENCOUNTER_CROWD, 1s);
+        }
+
+        void SetupEndlessEncounter()
+        {
+            eventType = TOS_EVENT_ENDLESS;
+            encounterInProgress = true;
+            waveInProgress = true;
+            waveCleared = false;
+
+            waveTemplate = sToSMapMgr->GetRandomWaveForEndless(currentWave);
+            if (!waveTemplate)
+            {
+                LOG_WARN("module", "Wave template is nullptr.");
+                return;
+            }
+
+            totalWaves = 999;
 
             currentSubGroup = 1;
             auto subGroups = sToSMapMgr->GetSubGroups(waveTemplate->enemyGroup);
@@ -845,32 +943,55 @@ public:
             }
             else
             {
-                NotifyPlayers();
-                PopulateRewardChest();
-                CleanupCreatures();
-
-                if (sConfigMgr->GetOption<bool>("TrialOfStrength.ResetCooldowns", true))
+                if (eventType == TOS_EVENT_TRIAL)
                 {
-                    ResetPlayerCooldowns();
-                }
+                    NotifyPlayers();
+                    PopulateRewardChest();
+                    CleanupCreatures();
 
-                waveInProgress = false;
-                waveCleared = true;
-                cheerPlayed = false;
+                    if (sConfigMgr->GetOption<bool>("TrialOfStrength.ResetCooldowns", true))
+                    {
+                        ResetPlayerCooldowns();
+                    }
 
-                if (currentWave == totalWaves)
-                {
-                    trialCompleted = true;
-                    AnnounceCompletion();
+                    waveInProgress = false;
+                    waveCleared = true;
+                    cheerPlayed = false;
 
-                    Position* tempPos = new Position(591.407, -162.424, -53.119, 4.915);
-                    dalaranPortal = instance->SummonGameObject(TOS_GO_PORTAL_TO_DALARAN, tempPos->GetPositionX(), tempPos->GetPositionY(), tempPos->GetPositionZ(), tempPos->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 86400);
-                    dalaranPortal->SetPhaseMask(2, true);
+                    if (currentWave == totalWaves)
+                    {
+                        trialCompleted = true;
+                        AnnounceCompletion();
+
+                        Position* tempPos = new Position(591.407, -162.424, -53.119, 4.915);
+                        dalaranPortal = instance->SummonGameObject(TOS_GO_PORTAL_TO_DALARAN, tempPos->GetPositionX(), tempPos->GetPositionY(), tempPos->GetPositionZ(), tempPos->GetOrientation(), 0.0f, 0.0f, 0.0f, 0.0f, 86400);
+                        dalaranPortal->SetPhaseMask(2, true);
+                    }
+                    else
+                    {
+                        SpawnCurseCrystals();
+                    }
                 }
-                else
-                {
-                    SpawnCurseCrystals();
+                else {
+                    NotifyPlayers();
+                    CleanupCreatures();
+                    //TODO: make mobs slightly stronger each wave
+                    waveTemplate = sToSMapMgr->GetRandomWaveForEndless(currentWave);
+                    if (!waveTemplate)
+                    {
+                        LOG_WARN("module", "Wave template is nullptr.");
+                        return;
+                    }
+                    currentWave++;
+                    currentSubGroup = 1;
+                    auto subGroups = sToSMapMgr->GetSubGroups(waveTemplate->enemyGroup);
+                    totalSubGroups = subGroups.size();
+
+                    instance->PlayDirectSoundToMap(TOS_SOUND_HORN);
+                    events.ScheduleEvent(TOS_DATA_ENCOUNTER_START_NEXT_WAVE, 10s);
+
                 }
+                
             }
         }
 
@@ -921,12 +1042,6 @@ public:
 
         void PopulateRewardChest()
         {
-            auto waveTemplate = sToSMapMgr->GetWaveTemplateForWave(currentWave);
-            if (!waveTemplate)
-            {
-                return;
-            }
-
             if (!waveTemplate->hasReward)
             {
                 return;
@@ -1012,7 +1127,94 @@ public:
             rewardBeam->SetPhaseMask(2, true);
         }
 
-        bool IsRewardChestEmpty()
+        void PopulateRewardForEndlessChest()
+        {
+            if (!waveTemplate->hasReward)
+            {
+                return;
+            }
+
+            auto rewardId = waveTemplate->rewardTemplate;
+
+            if (!rewardId)
+            {
+                return;
+            }
+
+            Position* tempPos = new Position(597.801, -188.556, -54.141, 3.350);
+            if ((rewardChest = instance->SummonGameObject(TOS_GOB_REWARD_CHEST, *tempPos, 0.0, 0.0, 0.0, 0.0, 0, true)))
+            {
+                rewardChest->SetPhaseMask(2, true);
+                rewardChest->loot.clear();
+                rewardChest->SetLootRecipient(instance);
+
+                rewardChest->loot.items.reserve(MAX_NR_LOOT_ITEMS);
+
+                auto rewardTemplates = sToSMapMgr->GetRewardTemplates(rewardId);
+                if (!rewardTemplates || rewardTemplates->empty())
+                {
+                    LOG_ERROR("module", "Failed to find trial of strength reward templates!");
+                    return;
+                }
+
+                for (auto rewardTemplate = rewardTemplates->begin(); rewardTemplate != rewardTemplates->end(); ++rewardTemplate)
+                {
+                    uint32 chance = urand(0, 100);
+                    if (chance > rewardTemplate->chance)
+                    {
+                        continue;
+                    }
+
+                    LootStoreItem* lootStoreItem = new LootStoreItem(rewardTemplate->itemEntry, 0, 0, false, 1, 0, 1, 1);
+
+                    LootItem lootItem(*lootStoreItem);
+                    lootItem.itemIndex = rewardChest->loot.items.size();
+                    lootItem.itemid = rewardTemplate->itemEntry;
+                    lootItem.follow_loot_rules = true;
+                    lootItem.freeforall = false;
+
+                    uint32 itemCount = urand(rewardTemplate->countMin, rewardTemplate->countMax);
+                    if (rewardTemplate->curseScalar)
+                    {
+                        itemCount = itemCount + ((GetCurseScaling() / 100) * rewardTemplate->curseScalar);
+                    }
+
+                    // hard cap the item count.
+                    lootItem.count = itemCount > rewardTemplate->countCap ? rewardTemplate->countCap : itemCount;
+
+                    rewardChest->loot.unlootedCount += 1;
+
+                    rewardChest->loot.items.push_back(lootItem);
+                }
+
+                uint32 minMoney = sConfigMgr->GetOption<uint32>("TrialOfStrength.MinRewardMoney", 5000);
+                uint32 maxMoney = sConfigMgr->GetOption<uint32>("TrialOfStrength.MaxRewardMoney", 10000);
+
+                if (sConfigMgr->GetOption<bool>("TrialOfStrength.Scaling.RewardMoney", true))
+                {
+                    uint32 scalar = sConfigMgr->GetOption<uint32>("TrialOfStrength.Scaling.RewardMoneyScalar", 50);
+                    uint32 curseScaling = 1 + (GetCurseScaling() / scalar);
+
+                    minMoney = minMoney * curseScaling;
+                    maxMoney = maxMoney * curseScaling;
+                }
+
+                uint32 capMoney = sConfigMgr->GetOption<uint32>("TrialOfStrength.CapRewardMoney", 1000000);
+
+                minMoney = minMoney > capMoney ? capMoney : minMoney;
+                maxMoney = maxMoney > capMoney ? capMoney : maxMoney;
+
+                rewardChest->loot.generateMoneyLoot(minMoney, maxMoney);
+
+                rewardChest->SetLootGenerationTime();
+                rewardChest->SetLootState(GO_READY);
+            }
+
+            rewardBeam = instance->SummonGameObject(TOS_GOB_REWARD_BEAM, *tempPos, 0.0, 0.0, 0.0, 0.0, 0, true);
+            rewardBeam->SetPhaseMask(2, true);
+        }
+
+        bool IsRewardChestEmpty() const
         {
             if (!rewardChest || !rewardChest->IsInWorld())
             {
@@ -1176,9 +1378,15 @@ public:
                     ss << "|cffFFFFFF, ";
                 }
             }
-
-            ss << Acore::StringFormatFmt(" |cffFFFFFFfor defeating all waves ({}) in the |cffFF2651Trial of Strength", sToSMapMgr->GetTotalWaves());
-
+            if (eventType== TOS_EVENT_TRIAL)
+            {
+                ss << Acore::StringFormatFmt(" |cffFFFFFFfor defeating all waves ({}) in the |cffFF2651Trial of Strength", sToSMapMgr->GetTotalWaves());
+            }
+            else
+            {
+                ss << Acore::StringFormatFmt(" |cffFFFFFFfor defeating ({}) waves in the |cffFF2651Trial of Strength", sToSMapMgr->GetTotalWaves());
+            }
+            
             if (hasCurses)
             {
                 ss << Acore::StringFormatFmt(" |cffFFFFFFwith |cffC436C1{}|cffFFFFFF curses!|r", curses.size());
@@ -1425,12 +1633,19 @@ public:
 
             switch (type)
             {
-                case TOS_DATA_ENCOUNTER_START:
-                    events.ScheduleEvent(TOS_DATA_ENCOUNTER_START, 0s);
+                case TOS_DATA_ENCOUNTER_TRIAL_START:
+                    events.ScheduleEvent(TOS_DATA_ENCOUNTER_TRIAL_START, 0s);
+                    break;
+                case TOS_DATA_ENCOUNTER_ENDLESS_START:
+                    events.ScheduleEvent(TOS_DATA_ENCOUNTER_ENDLESS_START, 0s);
                     break;
 
                 case TOS_DATA_ENCOUNTER_CURRENT_WAVE:
                     currentWave = data;
+                    break;
+
+                case TOS_DATA_ENCOUNTER_SELECTED_CURSE:
+                    SelectedCurse(data);
                     break;
 
                 case TOS_DATA_ENCOUNTER_RESET:
@@ -1627,7 +1842,7 @@ public:
         {
             switch (type)
             {
-                case TOS_DATA_ENCOUNTER_START:
+                case TOS_DATA_ENCOUNTER_TRIAL_START:
                     return encounterInProgress;
 
                 case TOS_DATA_ENCOUNTER_CURRENT_WAVE:
@@ -1635,6 +1850,9 @@ public:
 
                 case TOS_DATA_ENCOUNTER_CURRENT_WAVE_CLEARED:
                     return IsWaveCleared();
+
+                case TOS_DATA_ENCOUNTER_IS_REWARD_CHEST_EMPTY:
+                    return IsRewardChestEmpty();
 
                 case TOS_DATA_ENCOUNTER_HAS_MORE_WAVES:
                     return HasMoreWaves();
@@ -1859,8 +2077,11 @@ public:
 
             switch (events.ExecuteEvent())
             {
-            case TOS_DATA_ENCOUNTER_START:
-                SetupEncounter();
+            case TOS_DATA_ENCOUNTER_TRIAL_START:
+                SetupTrialEncounter();
+                break;
+            case TOS_DATA_ENCOUNTER_ENDLESS_START:
+                SetupEndlessEncounter();
                 break;
 
             case TOS_DATA_ENCOUNTER_COMBATANTS_HOSTILE:

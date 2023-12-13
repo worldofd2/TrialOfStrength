@@ -92,6 +92,13 @@ ToSWaveTemplate* ToSMapManager::GetWaveTemplateForWave(uint32 wave)
     return &it->second;
 }
 
+ToSWaveTemplate* ToSMapManager::GetRandomWaveForEndless(uint32 wave)
+{
+    auto randomWave = std::next(std::begin(WaveTemplates), urand(0, WaveTemplates.size() -1));
+
+    return &randomWave->second;
+}
+
 uint32 ToSMapManager::GetTotalWaves()
 {
     return WaveTemplates.size();
