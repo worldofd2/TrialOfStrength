@@ -125,8 +125,9 @@ std::vector<ToSEndlessWaveTemplate> ToSMapManager::GetRandomWavesForEndless(uint
     }
 
     //get random maxMobs mobs
-    std::sample(templates->begin(), templates->end(), std::back_inserter(enemies), maxMobs,
-        std::mt19937{ std::random_device{}() });
+    for (int i = 0; i < maxMobs; i++) {
+        enemies.push_back(templates->at(urand(0, templates->size()-1)));
+    }
 
     return enemies;
 }
