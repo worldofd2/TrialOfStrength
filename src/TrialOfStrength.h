@@ -10,6 +10,7 @@
 #include <vector>
 #include <unordered_map>
 #include <sstream>
+#include <random>
 
 enum DataTypes
 {
@@ -82,6 +83,7 @@ enum DataTypes
     TOS_DATA_ENCOUNTER_SELECTED_CURSE = 62,
     TOS_DATA_ENCOUNTER_TRIAL_START = 63,
     TOS_DATA_ENCOUNTER_ENDLESS_START = 64,
+    TOS_DATA_ENCOUNTER_TRY_RESURRECT = 65,
 
 };
 
@@ -106,10 +108,21 @@ struct ToSWaveTemplate {
     uint32 rewardTemplate;
 };
 
+struct ToSEndlessWaveTemplate {
+    uint32 id;
+    uint32 rank;
+    bool miniboss;
+    uint32 creatureEntry;
+};
+
 struct ToSEnemyGroup {
     uint32 id;
     uint32 group;
     uint32 subGroup;
+    uint32 creatureEntry;
+};
+
+struct ToSCreature {
     uint32 creatureEntry;
 };
 

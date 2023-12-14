@@ -1,5 +1,5 @@
 DELETE FROM `instance_template` WHERE `map`=44;
-INSERT INTO `instance_template` (`map`, `parent`, `script`, `allowMount`) VALUES (44, 0, 'instance_trial_of_strength', 0);
+-- INSERT INTO `instance_template` (`map`, `parent`, `script`, `allowMount`) VALUES (44, 0, 'instance_trial_of_strength', 0);
 
 -- Trial of Strength / Arena Master
 DELETE FROM `creature_template` WHERE `entry`=441250;
@@ -56,8 +56,8 @@ CREATE TABLE IF NOT EXISTS `tos_reward_template` (
 
 DELETE FROM `tos_reward_template`;
 INSERT INTO `tos_reward_template` (`id`, `item_entry`, `count_min`, `count_max`, `count_cap`, `chance`, `curse_scalar`, `note`) VALUES (1, 21215, 5, 10, 20, 50, 0, 'Graccu\'s Fruitcake');
-INSERT INTO `tos_reward_template` (`id`, `item_entry`, `count_min`, `count_max`, `count_cap`, `chance`, `curse_scalar`, `note`) VALUES (1, 44990, 1, 20, 500, 100, 0, 'Champion\'s Seal');
-INSERT INTO `tos_reward_template` (`id`, `item_entry`, `count_min`, `count_max`, `count_cap`, `chance`, `curse_scalar`, `note`) VALUES (1, 47241, 1, 30, 500, 100, 0, 'Emblem of Triumph');
+INSERT INTO `tos_reward_template` (`id`, `item_entry`, `count_min`, `count_max`, `count_cap`, `chance`, `curse_scalar`, `note`) VALUES (1, 44990, 1, 2, 500, 5, 0, 'Champion\'s Seal');
+INSERT INTO `tos_reward_template` (`id`, `item_entry`, `count_min`, `count_max`, `count_cap`, `chance`, `curse_scalar`, `note`) VALUES (1, 47241, 1, 3, 500, 5, 0, 'Emblem of Triumph');
 
 
 CREATE TABLE IF NOT EXISTS `tos_wave_groups` (
@@ -93,13 +93,34 @@ INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES 
 INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (4, 1, 441511, 'Wave 4/1 - Radioactive Bot');
 INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (4, 1, 441511, 'Wave 4/1 - Radioactive Bot');
 INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (4, 1, 441511, 'Wave 4/1 - Radioactive Bot');
-INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (5, 1, 441516, 'Wave 5/1 - Chicken');
-INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (5, 1, 441515, 'Wave 5/1 - Cow');
-INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (5, 1, 441514, 'Wave 5/1 - Frog');
-INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (5, 1, 441517, 'Wave 5/1 - Rabbit');
-INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (5, 1, 441512, 'Wave 5/1 - Rat');
-INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (5, 1, 441513, 'Wave 5/1 - Sheep');
 
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (5, 1, 16193, 'Wave 5/1 - skeletal smith');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (5, 1, 16193, 'Wave 5/1 - skeletal smith');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (5, 1, 16193, 'Wave 5/1 - skeletal smith');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (5, 1, 16146, 'Wave 5/1 - Death Knight');
+
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (6, 1, 16146, 'Wave 6/1 - Death Knight');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (6, 1, 16146, 'Wave 6/1 - Death Knight');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (6, 1, 16156, 'Wave 6/1 - Dark Touched Warrior');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (6, 2, 16156, 'Wave 6/2 - Dark Touched Warrior');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (6, 2, 16193, 'Wave 6/2 - skeletal smith');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (6, 2, 16193, 'Wave 6/2 - skeletal smith');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (6, 2, 16193, 'Wave 6/2 - skeletal smith');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (6, 2, 16193, 'Wave 6/2 - skeletal smith');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (6, 3, 16145, 'Wave 6/3 - Death Knight Captain');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (6, 3, 16145, 'Wave 6/3 - Death Knight Captain');
+
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (7, 1, 16146, 'Wave 7/1 - Death Knight');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (7, 1, 16146, 'Wave 7/1 - Death Knight');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (7, 1, 16145, 'Wave 7/1 - Death Knight Captain');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (7, 2, 16145, 'Wave 7/2 - Death Knight Captain');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (7, 2, 16145, 'Wave 7/2 - Death Knight Captain');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (7, 2, 16193, 'Wave 7/2 - skeletal smith');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (7, 2, 16193, 'Wave 7/2 - skeletal smith');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (7, 3, 16193, 'Wave 7/3 - Dark Touched Warrior');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (7, 3, 16193, 'Wave 7/3 - Dark Touched Warrior');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (7, 3, 16145, 'Wave 7/3 - Death Knight Captain');
+INSERT INTO `tos_wave_groups` (`group`, `sub_group`, `creature`, `note`) VALUES (7, 3, 16145, 'Wave 7/3 - Death Knight Captain');
 
 
 CREATE TABLE IF NOT EXISTS `tos_wave_template` (
@@ -116,6 +137,35 @@ INSERT INTO `tos_wave_template` (`wave`, `enemy_group`, `has_reward`, `reward_te
 INSERT INTO `tos_wave_template` (`wave`, `enemy_group`, `has_reward`, `reward_template`) VALUES (3, 3, 1, 1);
 INSERT INTO `tos_wave_template` (`wave`, `enemy_group`, `has_reward`, `reward_template`) VALUES (4, 4, 1, 1);
 INSERT INTO `tos_wave_template` (`wave`, `enemy_group`, `has_reward`, `reward_template`) VALUES (5, 5, 1, 1);
+INSERT INTO `tos_wave_template` (`wave`, `enemy_group`, `has_reward`, `reward_template`) VALUES (6, 6, 1, 1);
+INSERT INTO `tos_wave_template` (`wave`, `enemy_group`, `has_reward`, `reward_template`) VALUES (7, 7, 1, 1);
+
+
+-- For Endless we use ranks to classify difficulty of creatures
+CREATE TABLE IF NOT EXISTS `tos_endless_wave_template` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `rank` int DEFAULT NULL,
+  `miniboss` tinyint DEFAULT NULL,
+  `creature` int DEFAULT NULL,
+  `note` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+DELETE FROM `tos_endless_wave_template`;
+-- Rank 1 is wave 1 to 8
+INSERT INTO `tos_endless_wave_template` (`rank`, `miniboss`, `creature`, `note`) VALUES (1, 0, 441500, 'Riverpaw Outrunner');
+INSERT INTO `tos_endless_wave_template` (`rank`, `miniboss`, `creature`, `note`) VALUES (1, 0, 441501, 'Runt');
+INSERT INTO `tos_endless_wave_template` (`rank`, `miniboss`, `creature`, `note`) VALUES (1, 0, 441502, 'Hogger');
+INSERT INTO `tos_endless_wave_template` (`rank`, `miniboss`, `creature`, `note`) VALUES (1, 0, 441503, 'Trapper');
+INSERT INTO `tos_endless_wave_template` (`rank`, `miniboss`, `creature`, `note`) VALUES (1, 0, 441504, 'Smuggler');
+INSERT INTO `tos_endless_wave_template` (`rank`, `miniboss`, `creature`, `note`) VALUES (1, 0, 441505, 'Pillager');
+INSERT INTO `tos_endless_wave_template` (`rank`, `miniboss`, `creature`, `note`) VALUES (1, 1, 441506, 'Edwin Vancleef');
+-- Rank 2 is wave 9 to 16
+INSERT INTO `tos_endless_wave_template` (`rank`, `miniboss`, `creature`, `note`) VALUES (2, 0, 16193, 'Skeletal Smith');
+INSERT INTO `tos_endless_wave_template` (`rank`, `miniboss`, `creature`, `note`) VALUES (2, 0, 16146, 'Death Knight');
+INSERT INTO `tos_endless_wave_template` (`rank`, `miniboss`, `creature`, `note`) VALUES (2, 0, 16156, 'Dark Touched Warrior');
+INSERT INTO `tos_endless_wave_template` (`rank`, `miniboss`, `creature`, `note`) VALUES (2, 1, 16145, 'Death Knight Captain');
 
 
 CREATE TABLE IF NOT EXISTS `tos_curse_template` (
@@ -126,6 +176,7 @@ CREATE TABLE IF NOT EXISTS `tos_curse_template` (
   `name` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL,
   `description` varchar(200) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 
 DELETE FROM `tos_curse_template`;
 INSERT INTO `tos_curse_template` (`id`, `type`, `difficulty`, `aura`, `name`, `description`) VALUES (1, 0, 50, 68335, 'Enrage', 'Combatants are enraged, increasing their damage by 50%.');
@@ -149,6 +200,10 @@ INSERT INTO `tos_curse_template` (`id`, `type`, `difficulty`, `aura`, `name`, `d
 INSERT INTO `tos_curse_template` (`id`, `type`, `difficulty`, `aura`, `name`, `description`) VALUES (19, 0, 60, 31317, 'Vampiric', 'Combatants melee attacks heal for 300% of the damage.');
 INSERT INTO `tos_curse_template` (`id`, `type`, `difficulty`, `aura`, `name`, `description`) VALUES (20, 0, 20, 39007, 'Lesser Immolation', 'Combatants are engulfed in flame, emitting low amounts of fire damage every 2 seconds.');
 
+
+-- For previous versions of module
+DELETE FROM `gameobject` WHERE map = 44;
+
 -- Arena doors
 DELETE FROM `gameobject` WHERE (`id` = 161523 AND `phaseMask` = 2);
 INSERT INTO `gameobject` (`id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `ScriptName`, `VerifiedBuild`, `Comment`) VALUES
@@ -165,6 +220,10 @@ INSERT INTO `gameobject` (`id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMa
 DELETE FROM `gameobject` WHERE (`id` = 161525 AND `phaseMask` = 2);
 INSERT INTO `gameobject` (`id`, `map`, `zoneId`, `areaId`, `spawnMask`, `phaseMask`, `position_x`, `position_y`, `position_z`, `orientation`, `rotation0`, `rotation1`, `rotation2`, `rotation3`, `spawntimesecs`, `animprogress`, `state`, `ScriptName`, `VerifiedBuild`, `Comment`) VALUES
 (161525, 230, 1584, 1584, 1, 2, 607.668, -229.653, -52.8988, 1.8326, 0, 0, 0.793354, 0.608761, 600, 100, 1, '', 0, NULL);
+
+
+-- For previous versions of module
+DELETE FROM `creature` WHERE map = 44;
 
 -- Trial of Strength / Arena Master ring of law spawn
 DELETE FROM `creature` WHERE (`id1` = 441250);
@@ -201,6 +260,7 @@ INSERT INTO `creature` (`guid`, `id1`, `id2`, `id3`, `map`, `zoneId`, `areaId`, 
 (3110514, 441253, 0, 0, 230, 0, 0, 1, 2, 0, 655.154, -186.457, -35.5601, 3.20841, 300, 0, 0, 5194, 0, 0, 0, 0, 0, '', NULL, 0, NULL),
 (3110515, 441253, 0, 0, 230, 0, 0, 1, 2, 0, 655.202, -195.439, -35.5745, 3.0317, 300, 0, 0, 5342, 0, 0, 0, 0, 0, '', NULL, 0, NULL),
 (3110516, 441253, 0, 0, 230, 0, 0, 1, 2, 0, 653.229, -207.398, -35.2822, 2.82907, 300, 0, 0, 5194, 0, 0, 0, 0, 0, '', NULL, 0, NULL);
+
 
 -- Wave 5
 DELETE FROM `creature_template` WHERE `entry`=441517;

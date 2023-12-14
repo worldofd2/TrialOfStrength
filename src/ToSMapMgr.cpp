@@ -60,8 +60,9 @@ void ToSMapManager::ClearCurses(Unit* unit)
     {
         return;
     }
+    std::vector<ToSCurseTemplate> curses = sToSMapMgr->GetCurses();
 
-    for (auto const& curse : sToSMapMgr->GetCurses())
+    for (auto curse : curses)
     {
         if (unit->HasAura(curse.aura))
         {
@@ -92,11 +93,42 @@ ToSWaveTemplate* ToSMapManager::GetWaveTemplateForWave(uint32 wave)
     return &it->second;
 }
 
-ToSWaveTemplate* ToSMapManager::GetRandomWaveForEndless(uint32 wave)
+std::vector<ToSEndlessWaveTemplate> ToSMapManager::GetRandomWavesForEndless(uint32 wave)
 {
-    auto randomWave = std::next(std::begin(WaveTemplates), urand(0, WaveTemplates.size() -1));
+    std::vector<ToSEndlessWaveTemplate> enemies;
 
-    return &randomWave->second;
+    auto rank = (int)((wave / 8) + 1);
+    auto difficulty = std::max((int)wave % 8, 1);
+    auto minMobs = 3;
+    auto mobIncreaseCoeff = (rank * 0.25) + 1;
+    auto maxMobs = (int)(minMobs * mobIncreaseCoeff);
+    //to keep it spicy
+    maxMobs += urand(0, difficulty);
+
+    //5% chance to get a miniboss + 5% everyrank
+    auto percent = 0.05 * rank;
+    if (roll_chance_i(std::min((int)percent * 100, 100))) {
+        //miniboss
+    }
+
+    auto templates = sToSMapMgr->GetEndlessWaveTemplate(rank);
+    if (!templates)
+    {
+        //We probably don't have configuration for this rank, try to find a configuration for a lower rank
+        for (int i = rank; i > 0; i--) {
+            templates = sToSMapMgr->GetEndlessWaveTemplate(rank);
+            if (templates) break;
+        }
+        if (!templates) {
+            return enemies;
+        }
+    }
+
+    //get random maxMobs mobs
+    std::sample(templates->begin(), templates->end(), std::back_inserter(enemies), maxMobs,
+        std::mt19937{ std::random_device{}() });
+
+    return enemies;
 }
 
 uint32 ToSMapManager::GetTotalWaves()
@@ -104,16 +136,18 @@ uint32 ToSMapManager::GetTotalWaves()
     return WaveTemplates.size();
 }
 
-std::vector<ToSEnemyGroup*> ToSMapManager::GetEnemiesFromGroup(uint32 groupId, uint32 subGroup)
+std::vector<ToSCreature> ToSMapManager::GetEnemiesFromGroup(uint32 groupId, uint32 subGroup)
 {
-    std::vector<ToSEnemyGroup*> groups;
+    std::vector<ToSCreature> groups;
 
     for (auto it = EnemyGroups.begin(); it != EnemyGroups.end(); ++it)
     {
         if (it->second.group == groupId &&
             it->second.subGroup == subGroup)
         {
-            groups.push_back(&it->second);
+            ToSCreature creature;
+            creature.creatureEntry = *(&it->second.creatureEntry);
+            groups.push_back(creature);
         }
     }
 
@@ -147,6 +181,18 @@ std::vector<ToSRewardTemplate>* ToSMapManager::GetRewardTemplates(uint32 rewardI
 {
     auto it = RewardTemplates.find(rewardId);
     if (it == RewardTemplates.end())
+    {
+        return nullptr;
+
+    }
+
+    return &it->second;
+}
+
+std::vector<ToSEndlessWaveTemplate>* ToSMapManager::GetEndlessWaveTemplate(uint32 rank)
+{
+    auto it = EndlessWaveTemplates.find(rank);
+    if (it == EndlessWaveTemplates.end())
     {
         return nullptr;
     }

@@ -45,6 +45,47 @@ void LoadWaveTemplates()
     LOG_INFO("module", "Loaded '{}' trial of strength wave templates.", count);
 }
 
+void LoadEndlessWaveTemplates()
+{
+    auto qResult = WorldDatabase.Query("SELECT * FROM tos_endless_wave_template");
+
+    if (!qResult)
+    {
+        return;
+    }
+
+    LOG_INFO("module", "Loading trial of strength endless wave templates from 'tos_endless_wave_template'..");
+
+    int count = 0;
+
+    do
+    {
+        auto fields = qResult->Fetch();
+
+        ToSEndlessWaveTemplate endlessWaveTemplate;
+        endlessWaveTemplate.id = fields[0].Get<uint32>();
+        endlessWaveTemplate.rank = fields[1].Get<uint32>();
+        endlessWaveTemplate.miniboss = fields[2].Get<bool>();
+        endlessWaveTemplate.creatureEntry = fields[3].Get<uint32>();
+
+        auto templates = sToSMapMgr->GetEndlessWaveTemplate(endlessWaveTemplate.rank);
+        if (!templates)
+        {
+            std::vector<ToSEndlessWaveTemplate> newTemplates;
+            newTemplates.push_back(endlessWaveTemplate);
+            sToSMapMgr->EndlessWaveTemplates.emplace(endlessWaveTemplate.rank, newTemplates);
+        }
+        else
+        {
+            templates->push_back(endlessWaveTemplate);
+        }
+
+        count++;
+    } while (qResult->NextRow());
+
+    LOG_INFO("module", "Loaded '{}' trial of strength endless wave templates.", count);
+}
+
 void LoadEnemyGroups()
 {
     auto qResult = WorldDatabase.Query("SELECT * FROM tos_wave_groups");
@@ -173,6 +214,7 @@ void ToSWorldScript::OnAfterConfigLoad(bool reload)
     }
 
     LoadWaveTemplates();
+    LoadEndlessWaveTemplates();
     LoadEnemyGroups();
     LoadRewardTemplates();
     LoadCurseTemplates();
