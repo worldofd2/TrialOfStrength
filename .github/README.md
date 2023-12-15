@@ -4,7 +4,8 @@ Trial of Strength (ToS) is an AzerothCore module that adds a test of strength ar
 ## Features
 - [x] A Trial mode
   - [x] Rewards at the end of every wave.
-  - [ ] Curses and Affixes to add difficulty and increase rewards.
+  - [x] Curses and Affixes to add difficulty and increase rewards.
+  - [ ] Proper reward scaling for curses
 - [x] An Endless mode of increasing difficulty
   - [ ] Better rewards at the end based on how many waves you survived
   - [ ] Curses and Affixes to add difficulty and increase rewards.
@@ -22,7 +23,7 @@ Trial of Strength (ToS) is an AzerothCore module that adds a test of strength ar
 3. Spawn the arena entry (entry: 441250) NPC anywhere you want.
 
 ## Note
-This module is a work in progress, so expect bugs and crashes as the module is not heavily tested.
+This module is a work in progress, so expect bugs and crashes as the module is not heavily tested.  
 Based on Trial Of Strength by [AnchyDev](https://github.com/AnchyDev).
 
 ## Additional info
