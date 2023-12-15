@@ -13,6 +13,7 @@
 
 #include "scripts/ToSPlayerScript.h"
 #include "scripts/ToSCurseCrystalScript.h"
+#include "scripts/ToSPortalDalaranScript.h"
 
 void LoadWaveTemplates()
 {
@@ -239,4 +240,5 @@ void SC_AddTrialOfStrengthScripts()
 
     new ToSPlayerScript();
     new ToSCurseCrystalScript();
+    new ToSPortalDalaranScript();
 }

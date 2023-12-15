@@ -466,39 +466,25 @@ public:
 
         void SpawnCurseCrystals()
         {
-            auto randomCurses = GetRandomAvailableCurses(3);
-
             // Crystal 1
-            if (auto curse1 = randomCurses.at(0))
+            Position* tempPos = new Position(598.427, -193.308, -54.090, 3.417);
+            if ((curseCrystal1 = instance->SummonGameObject(TOS_GOB_CURSE, *tempPos, 0.0, 0.0, 0.0, 0.0, 0, true)))
             {
-                Position* tempPos = new Position(598.427, -193.308, -54.090, 3.417);
-                if ((curseCrystal1 = instance->SummonGameObject(TOS_GOB_CURSE, *tempPos, 0.0, 0.0, 0.0, 0.0, 0, true)))
-                {
-                    curseCrystal1->SetPhaseMask(2, true);
-                    curseId1 = curse1;
-                }
+                curseCrystal1->SetPhaseMask(2, true);
             }
-
+            
             // Crystal 2
-            if (auto curse2 = randomCurses.at(1))
+            tempPos = new Position(592.718, -190.003, -54.101, 3.417);
+            if ((curseCrystal2 = instance->SummonGameObject(TOS_GOB_CURSE, *tempPos, 0.0, 0.0, 0.0, 0.0, 0, true)))
             {
-                Position* tempPos = new Position(592.718, -190.003, -54.101, 3.417);
-                if ((curseCrystal2 = instance->SummonGameObject(TOS_GOB_CURSE, *tempPos, 0.0, 0.0, 0.0, 0.0, 0, true)))
-                {
-                    curseCrystal2->SetPhaseMask(2, true);
-                    curseId2 = curse2;
-                }
+                curseCrystal2->SetPhaseMask(2, true);
             }
 
             // Crystal 3
-            if (auto curse3 = randomCurses.at(2))
+            tempPos = new Position(596.132, -183.018, -54.090, 3.417);
+            if ((curseCrystal3 = instance->SummonGameObject(TOS_GOB_CURSE, *tempPos, 0.0, 0.0, 0.0, 0.0, 0, true)))
             {
-                Position* tempPos = new Position(596.132, -183.018, -54.090, 3.417);
-                if ((curseCrystal3 = instance->SummonGameObject(TOS_GOB_CURSE, *tempPos, 0.0, 0.0, 0.0, 0.0, 0, true)))
-                {
-                    curseCrystal3->SetPhaseMask(2, true);
-                    curseId3 = curse3;
-                }
+                curseCrystal3->SetPhaseMask(2, true);
             }
         }
 
@@ -569,7 +555,7 @@ public:
             }
         }
 
-        uint32 GetRandomAvailableCurse()
+        uint32 GetRandomAvailableCurse() const
         {
             if (availableCurseIds.size() < 1)
             {
@@ -585,32 +571,6 @@ public:
             }
 
             return curseId;
-        }
-
-        std::vector<uint32> GetRandomAvailableCurses(uint32 count)
-        {
-            std::vector<uint32> randomCurses;
-
-            if (availableCurseIds.size() < 1)
-            {
-                return randomCurses;
-            }
-
-            std::random_device rd;
-            std::mt19937 g(rd());
-            std::shuffle(availableCurseIds.begin(), availableCurseIds.end(), g);
-
-            for (uint32 i = 0; i < count; i++)
-            {
-                if (availableCurseIds.size() < count)
-                {
-                    break;
-                }
-
-                randomCurses.push_back(availableCurseIds.at(i));
-            }
-
-            return randomCurses;
         }
 
 
@@ -1159,7 +1119,7 @@ public:
 
         bool IsEncounterInProgress() const
         {
-            return encounterInProgress;
+            return InstanceScript::IsEncounterInProgress() || encounterInProgress;
         }
 
         uint32 GetRemainingAlive() const
@@ -1780,6 +1740,9 @@ public:
 
                 case TOS_DATA_ENCOUNTER_CURRENT_WAVE:
                     return currentWave;
+
+                case TOS_DATA_ENCOUNTER_GET_RANDOM_CURSE:
+                    return GetRandomAvailableCurse();
 
                 case TOS_DATA_ENCOUNTER_CURRENT_WAVE_CLEARED:
                     return IsWaveCleared();
