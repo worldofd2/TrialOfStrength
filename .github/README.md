@@ -17,6 +17,13 @@ Trial of Strength (ToS) is an AzerothCore module that adds a test of strength ar
 - [ ] MORE
 - [x] Made for group play.
 
+## A note on endless waves
+Balanced around wave 35 being endgame ( hardest wave )
+Wave 1 to 15, mobs damage and hp increase by 8%
+Wave 16+ mobs damage and hp increase by 10%
+Modifier and scaling levels in image below
+![modifier](https://github.com/sokie/TrialOfStrength/blob/master/Modifiers.png)
+
 ## Setup
 1. Clone the module into your AzerothCore modules directory.
 2. Enable the module.
