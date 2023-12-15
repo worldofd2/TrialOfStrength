@@ -20,7 +20,8 @@ Trial of Strength (ToS) is an AzerothCore module that adds a test of strength ar
 ## A note on endless waves
 Balanced around wave 35 being endgame ( hardest wave )  
 Wave 1 to 15, mobs damage and hp increase by 8%  
-Wave 16+ mobs damage and hp increase by 10%  
+Wave 16+ mobs damage and hp increase by 10%
+Every 100 difficulty curse adds 20% chance to base loot chance
 Modifier and scaling levels in image below  
 
 ![modifier](https://github.com/sokie/TrialOfStrength/blob/master/Modifiers.png)
