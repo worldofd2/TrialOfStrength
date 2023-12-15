@@ -7,12 +7,13 @@ Trial of Strength (ToS) is an AzerothCore module that adds a test of strength ar
   - [x] Curses and Affixes to add difficulty and increase rewards.
   - [ ] Proper reward scaling for curses
 - [x] An Endless mode of increasing difficulty
-  - [ ] Better rewards at the end based on how many waves you survived
-  - [ ] Curses and Affixes to add difficulty and increase rewards.
-  - [ ] Curses stacking for Endless mode for MOAR rewards
+  - [x] Better rewards at the end based on how many waves you survived
+  - [x] Curses and Affixes to add difficulty and increase rewards.
+  - [x] Curses stacking for Endless mode for MOAR rewards
+  - [ ] Custom HP/DMG scaling based on wave number
 - [ ] A key mode where Trial rewards a key you can use for Endless Mode
 - [ ] Endless mode skip x waves feature ( with a cost )
-- [ ] Better reward implementation and calculation
+- [x] Better reward implementation and calculation
 - [ ] Mythic style affixes
 - [ ] MORE
 - [x] Made for group play.
