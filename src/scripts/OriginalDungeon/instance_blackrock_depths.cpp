@@ -286,25 +286,34 @@ public:
         void SelectedCurse(uint32 curseId) {
             AddCurse(curseId);
             RemoveAvailableCurse(curseId);
-            DespawnCurseCrystals();
+            //DespawnCurseCrystals();
         }
 
         void AddCurse(uint32 curseId)
         {
-            auto it = sToSMapMgr->CurseTemplates.find(curseId);
-            if (it == sToSMapMgr->CurseTemplates.end())
+            auto curse = sToSMapMgr->GetCurseById(curseId);
+            if (!curse)
             {
                 LOG_WARN("module", "Tried to add curse {} to creature curses but it does not exist.", curseId);
                 return;
             }
+            curses.push_back(curse);
 
-            auto curse = sToSMapMgr->GetCurseById(curseId);
-            if (!curse)
+            std::stringstream ss;
+
+            uint32 total = 0;
+            for (const auto& curse : curses)
             {
-                return;
+                total += curse->difficulty;
             }
 
-            curses.push_back(curse);
+            ss << Acore::StringFormatFmt(" |cffFFFFFFEnabled curse: |cffC436C1{}|cffFFFFFF\n{}|r", curse->name, curse->description);
+
+            ss << Acore::StringFormatFmt("\n{}\n{}!|r", sToSMapMgr->GetDifficultyString(curse->difficulty), sToSMapMgr->GetExtraLootString(curse->difficulty));
+
+            ss << Acore::StringFormatFmt("\n\nTotal curse loot percent: {}", (((float)total/100)*20));
+
+            NotifyPlayers(ss.str());
         }
 
         bool IsSubWaveCleared() const
@@ -415,19 +424,25 @@ public:
             for (auto const& curse : curses)
             {
                 if (unit->ToPlayer() &&
-                    curse->type == TOS_CURSE_TYPE_PLAYER &&
-                    !unit->HasAura(curse->aura))
+                    curse->type == TOS_CURSE_TYPE_PLAYER)
                 {
                     unit->AddAura(curse->aura, unit);
                     continue;
                 }
+                else {
+                    //debugging
+                    LOG_WARN("module", "Unable to add curse {} to player.", curse->name);
+                }
 
                 if (!unit->ToPlayer() &&
-                    curse->type == TOS_CURSE_TYPE_ENEMY &&
-                    !unit->HasAura(curse->aura))
+                    curse->type == TOS_CURSE_TYPE_ENEMY)
                 {
                     unit->AddAura(curse->aura, unit);
                     continue;
+                }
+                else {
+                    //debugging
+                    LOG_WARN("module", "Unable to add curse {} to enemy {}.", curse->name, unit->GetName());
                 }
             }
         }
@@ -794,11 +809,13 @@ public:
             }
             else
             {
+                auto maxWavesCleared = currentWave;
+                std::vector<ToSCurseTemplate*> cursesChosen = curses;
                 AnnounceCompletion();
                 events.ScheduleEvent(TOS_DATA_ENCOUNTER_TRY_RESURRECT, 7s);
 
                 ResetEncounter();
-                PopulateRewardChest();
+                PopulateRewardChestForEndless(maxWavesCleared, cursesChosen);
 
                 return true;
             }
@@ -915,7 +932,7 @@ public:
                 if (eventType == TOS_EVENT_TRIAL)
                 {
                     NotifyPlayers();
-                    PopulateRewardChest();
+                    PopulateRewardChestForTrial();
                     CleanupCreatures();
 
                     if (sConfigMgr->GetOption<bool>("TrialOfStrength.ResetCooldowns", true))
@@ -1009,8 +1026,42 @@ public:
             }
         }
 
-        void PopulateRewardChestForTrial(uint32 rewardId)
+        void NotifyPlayers(std::string message)
         {
+            Map::PlayerList const& players = instance->GetPlayers();
+
+            for (const auto& it : players)
+            {
+                Player* player = it.GetSource();
+
+                if (!player)
+                    continue;
+
+                player->SendSystemMessage(message);
+ 
+                {
+                    WorldPacket data(SMSG_NOTIFICATION, (message.size() + 1));
+                    data << message;
+
+                    player->SendDirectMessage(&data);
+                }
+            }
+        }
+
+        void PopulateRewardChestForTrial()
+        {
+            if (!waveTemplate->hasReward)
+            {
+                return;
+            }
+
+            auto rewardId = waveTemplate->rewardTemplate;
+
+            if (!rewardId)
+            {
+                return;
+            }
+
             Position* tempPos = new Position(597.801, -188.556, -54.141, 3.350);
             if ((rewardChest = instance->SummonGameObject(TOS_GOB_REWARD_CHEST, *tempPos, 0.0, 0.0, 0.0, 0.0, 0, true)))
             {
@@ -1046,7 +1097,7 @@ public:
                     uint32 itemCount = urand(rewardTemplate->countMin, rewardTemplate->countMax);
                     if (rewardTemplate->curseScalar)
                     {
-                        itemCount = itemCount + ((GetCurseScaling() / 100) * rewardTemplate->curseScalar);
+                        itemCount = itemCount + (((float)GetCurseScaling() / 100) * rewardTemplate->curseScalar);
                     }
 
                     // hard cap the item count.
@@ -1056,6 +1107,73 @@ public:
 
                     rewardChest->loot.items.push_back(lootItem);
                 }
+
+                uint32 minMoney = sConfigMgr->GetOption<uint32>("TrialOfStrength.MinRewardMoney", 5000);
+                uint32 maxMoney = sConfigMgr->GetOption<uint32>("TrialOfStrength.MaxRewardMoney", 10000);
+
+                if (sConfigMgr->GetOption<bool>("TrialOfStrength.Scaling.RewardMoney", true))
+                {
+                    uint32 scalar = sConfigMgr->GetOption<uint32>("TrialOfStrength.Scaling.RewardMoneyScalar", 50);
+                    uint32 curseScaling = 1 + ((float)GetCurseScaling() / scalar);
+
+                    minMoney = minMoney * curseScaling;
+                    maxMoney = maxMoney * curseScaling;
+                }
+
+                uint32 capMoney = sConfigMgr->GetOption<uint32>("TrialOfStrength.CapRewardMoney", 1000000);
+
+                minMoney = minMoney > capMoney ? capMoney : minMoney;
+                maxMoney = maxMoney > capMoney ? capMoney : maxMoney;
+
+                rewardChest->loot.generateMoneyLoot(minMoney, maxMoney);
+
+                rewardChest->SetLootGenerationTime();
+                rewardChest->SetLootState(GO_READY);
+            }
+
+            rewardBeam = instance->SummonGameObject(TOS_GOB_REWARD_BEAM, *tempPos, 0.0, 0.0, 0.0, 0.0, 0, true);
+            rewardBeam->SetPhaseMask(2, true);
+        }
+
+        void PopulateRewardChestForEndless(uint32 maxWaveCleared, std::vector<ToSCurseTemplate*> cursesChosen)
+        {
+            //TODO: better
+            std::vector<int> waveLootChance = { 0,25,50,75,100,140,180,220,260,300,340,380,420,460,480,520,560,600,640,700,880,1060,1240,1420,1600,1780,1960,2140,2320,2500,2680,2860,3040,3220,3400 };
+
+            Position* tempPos = new Position(597.801, -188.556, -54.141, 3.350);
+            if ((rewardChest = instance->SummonGameObject(TOS_GOB_REWARD_CHEST, *tempPos, 0.0, 0.0, 0.0, 0.0, 0, true)))
+            {
+                rewardChest->SetPhaseMask(2, true);
+                rewardChest->loot.clear();
+                rewardChest->SetLootRecipient(instance);
+
+                rewardChest->loot.items.reserve(MAX_NR_LOOT_ITEMS);
+
+                LootStoreItem* lootStoreItem = new LootStoreItem(TOS_ENDLESS_EMBLEM_REWARD, 0, 0, false, 1, 0, 1, 1);
+
+                LootItem lootItem(*lootStoreItem);
+                lootItem.itemIndex = rewardChest->loot.items.size();
+                lootItem.itemid = TOS_ENDLESS_EMBLEM_REWARD;
+                lootItem.follow_loot_rules = true;
+                lootItem.freeforall = false;
+
+                uint32 itemCount = ((float)waveLootChance.at(maxWaveCleared) / 100) * 1;
+  
+                uint32 total = 0;
+
+                for (const auto& curse : cursesChosen)
+                {
+                    total += curse->difficulty;
+                }
+                //Add curse percentage
+                auto percentage = (((float)total / 100) * TOS_CURSE_BASE_LOOT_CHANCE);
+  
+                lootItem.count = itemCount * ((percentage/100)+1);
+
+                rewardChest->loot.unlootedCount += 1;
+
+                rewardChest->loot.items.push_back(lootItem);
+                
 
                 uint32 minMoney = sConfigMgr->GetOption<uint32>("TrialOfStrength.MinRewardMoney", 5000);
                 uint32 maxMoney = sConfigMgr->GetOption<uint32>("TrialOfStrength.MaxRewardMoney", 10000);
@@ -1082,29 +1200,6 @@ public:
 
             rewardBeam = instance->SummonGameObject(TOS_GOB_REWARD_BEAM, *tempPos, 0.0, 0.0, 0.0, 0.0, 0, true);
             rewardBeam->SetPhaseMask(2, true);
-        }
-
-        void PopulateRewardChest()
-        {
-            if (eventType == TOS_EVENT_TRIAL)
-            {
-                if (!waveTemplate->hasReward)
-                {
-                    return;
-                }
-
-                auto rewardId = waveTemplate->rewardTemplate;
-
-                if (!rewardId)
-                {
-                    return;
-                }
-                PopulateRewardChestForTrial(rewardId);
-            }
-            else {
-                //TODO:
-            }
-           
         }
 
         bool IsRewardChestEmpty() const
@@ -1240,6 +1335,9 @@ public:
                 RelocateArenaMaster(true);
                 arenaMasterLeft = false;
             }
+
+            //We let people choose curses from beggining
+            SpawnCurseCrystals();
         }
 
         void AnnounceCompletion()

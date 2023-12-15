@@ -22,6 +22,7 @@ public:
 
     std::string GetHexColorFromClass(uint8 classId);
     std::string GetDifficultyString(uint32 difficulty);
+    std::string GetExtraLootString(uint32 difficulty);
     std::vector<ToSCurseTemplate> GetCurses();
     void ClearCurses(Unit* unit);
     ToSCurseTemplate* GetCurseById(uint32 curseId);

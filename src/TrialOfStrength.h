@@ -100,6 +100,9 @@ enum ToSConstants {
     TOS_DATA_UINT32_BASE = 4411,
     TOS_DATA_UINT32_CURSE_ID = 0,
     TOS_GO_PORTAL_TO_DALARAN = 441354,
+    //Curse adds 20% more loot at 100 difficulty
+    TOS_CURSE_BASE_LOOT_CHANCE = 20,
+    TOS_ENDLESS_EMBLEM_REWARD = 47241,
 };
 
 struct ToSWaveTemplate {

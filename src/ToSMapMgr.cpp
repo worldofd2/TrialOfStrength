@@ -42,6 +42,16 @@ std::string ToSMapManager::GetDifficultyString(uint32 difficulty)
     return ss.str();
 }
 
+std::string ToSMapManager::GetExtraLootString(uint32 difficulty)
+{
+    auto percentage = ((float)difficulty / 100) * TOS_CURSE_BASE_LOOT_CHANCE;
+    std::stringstream ss;
+
+    ss << Acore::StringFormatFmt("Increase base loot chance by {}%", percentage);
+
+    return ss.str();
+}
+
 std::vector<ToSCurseTemplate> ToSMapManager::GetCurses()
 {
     std::vector<ToSCurseTemplate> curses;
